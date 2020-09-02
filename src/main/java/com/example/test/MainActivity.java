@@ -18,9 +18,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         start = (Button) findViewById(R.id.buttonStart);
+
         stop = (Button) findViewById(R.id.buttonStop);
 
         start.setOnClickListener(this);
+
         stop.setOnClickListener(this);
     }
 
