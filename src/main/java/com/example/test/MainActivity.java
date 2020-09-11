@@ -1,7 +1,11 @@
 package com.example.test;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,11 +26,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Spinner mSpinner;
 
+    private MyService mService;
+
+    private boolean mIsBounded=false;
+
     public static final int SIZE_OF_RECYCLER_ELEMENTS = 100;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Service creation and binding
+        Intent intent = new Intent(this,MyService.class);
+        bindService(intent,mConnection,Context.BIND_AUTO_CREATE);
 
         //RecyclerView creation
         mNumberList=findViewById(R.id.main_RecyclerView);
@@ -51,13 +63,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mSpinner.setAdapter(spinnerAdapter);
     }
 
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            MyService.MyBinder binder = (MyService.MyBinder) iBinder;
+            mService = binder.getService();
+            mIsBounded = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mIsBounded = false;
+        }
+    };
 
     @Override
     public void onClick(View view) {
         if (view == mGenerateButton) {
-            startService(new Intent(this, MyService.class));
+
         } else if (view == mSortButton) {
-            stopService(new Intent(this, MyService.class));
+
         }
     }
 }

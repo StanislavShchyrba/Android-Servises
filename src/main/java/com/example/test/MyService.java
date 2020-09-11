@@ -3,6 +3,7 @@ package com.example.test;
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Binder;
 import android.os.IBinder;
 import android.provider.Settings;
 
@@ -10,13 +11,24 @@ import androidx.annotation.Nullable;
 
 public class MyService extends Service {
 
-private MediaPlayer player;
+    private final IBinder mBinder = new MyBinder();
+
+    public enum ChooseSort{
+        BUBBLESORT,
+        QUICKSORT,
+        COUNTINGSORT
+    }
+
+    //JNI
+    private native int[] generate (int count);
+
+    private native int[] sort(int[] array, ChooseSort chSort);
+
+    public native String stringFromJNI();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        player= MediaPlayer.create(this, Settings.System.DEFAULT_ALARM_ALERT_URI);
-        player.setLooping(true);
-        player.start();
+
         return START_STICKY;
     }
 
@@ -24,12 +36,18 @@ private MediaPlayer player;
     public void onDestroy() {
         super.onDestroy();
 
-        player.stop();
+
     }
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return mBinder;
+    }
+
+    public class MyBinder extends Binder{
+        MyService getService(){
+            return MyService.this;
+        }
     }
 }
