@@ -168,7 +168,6 @@
       "project": {
         "compilerSettingsCacheFolder": "D:\\Users\\Test\\.cxx",
         "cxxFolder": "D:\\Users\\Test\\.cxx",
-        "ideBuildTargetAbi": "x86",
         "isBuildOnlyTargetAbiEnabled": true,
         "isCmakeBuildCohabitationEnabled": false,
         "isNativeCompilerSettingsCacheEnabled": false,
@@ -192,7 +191,10 @@
     "objFolder": "D:\\Users\\Test\\app\\build\\intermediates\\cmake\\debug\\obj",
     "variantName": "debug",
     "validAbiList": [
-      "X86"
+      "ARMEABI_V7A",
+      "ARM64_V8A",
+      "X86",
+      "X86_64"
     ],
     "prefabDirectory": "D:\\Users\\Test\\app\\.cxx\\cmake\\debug\\prefab",
     "prefabPackageDirectoryList": []
