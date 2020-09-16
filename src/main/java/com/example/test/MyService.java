@@ -2,29 +2,28 @@ package com.example.test;
 
 import android.app.Service;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
-import android.provider.Settings;
 
 import androidx.annotation.Nullable;
 
+import com.example.test.sorters.Sorter;
+import com.example.test.sorters.SorterFactory;
+
 public class MyService extends Service {
+    static {
+        System.loadLibrary("native-lib");
+    }
 
     private final IBinder mBinder = new MyBinder();
 
-    public enum ChooseSort{
-        BUBBLESORT,
-        QUICKSORT,
-        COUNTINGSORT
+    private native int[] nativeGenerate(int count);
+
+    private int[] sort(int[] array, Sorter.SortingMethod method) {
+        Sorter sorter = SorterFactory.create(method);
+        return sorter.sort(array);
     }
 
-    //JNI
-    private native int[] generate (int count);
-
-    private native int[] sort(int[] array, ChooseSort chSort);
-
-    public native String stringFromJNI();
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -45,9 +44,23 @@ public class MyService extends Service {
         return mBinder;
     }
 
-    public class MyBinder extends Binder{
-        MyService getService(){
+    public class MyBinder extends Binder {
+
+        public int[] sort(int[] array, Sorter.SortingMethod method) {
+            return MyService.this.sort(array, method);
+        }
+
+        public int[] generate(int count) {
+            return MyService.this.nativeGenerate(count);
+        }
+
+
+        MyService getService() {
             return MyService.this;
+        }
+
+        MyBinder getBinder() {
+            return MyBinder.this;
         }
     }
 }

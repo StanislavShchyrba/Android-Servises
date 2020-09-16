@@ -1,9 +1,7 @@
 <resources>
-    <string name="app_name">Test</string>
-    
-    <string-array name="sorting_algorithm">
-        <item>Bubble sort</item>
-        <item>Quicksort</item>
-        <item>Counting sort</item>
-    </string-array>
+    <string name="app_name">Sorting integers</string>
+
+    <string name="bubble_sort">Bubble Sort</string>
+    <string name="quicksort">Quicksort</string>
+    <string name="counting_sort">Counting Sort</string>
 </resources>

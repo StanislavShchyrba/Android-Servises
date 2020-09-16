@@ -3,65 +3,56 @@ package com.example.test;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-public class NumbersAdapter extends RecyclerView.Adapter<NumbersAdapter.NumbersViewHolder>{
+public class NumbersAdapter extends RecyclerView.Adapter<NumbersAdapter.NumbersViewHolder> {
+    private int[] mNumArray;
 
-    private static int mViewHolderCount;
-    private int mNumberOfItems;
-
-    public NumbersAdapter(int numberOfItems){
-        mNumberOfItems = numberOfItems;
-        mViewHolderCount=0;
+    public NumbersAdapter(int numArray) {
+        mNumArray = new int[numArray];
     }
-    @SuppressLint("SetTextI18n")
+
+    public void setDataSet(int[] array) {
+        mNumArray = array;
+        notifyDataSetChanged();
+    }
+
+    public int[] getDataSet() {
+        return mNumArray;
+    }
+
     @NonNull
     @Override
     public NumbersViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context=parent.getContext();
-        int layoutIdForListItem = R.layout.main_recycler_element;
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.main_recycler_element, parent, false);
 
-        LayoutInflater inflater=LayoutInflater.from(context);
-
-        View view = inflater.inflate(layoutIdForListItem,parent,false);
-
-        NumbersViewHolder viewHolder = new NumbersViewHolder(view);
-        viewHolder.mViewHolderIndex.setText("ViewHolder Index: "+mViewHolderCount);
-
-        ++mViewHolderCount;
-
-        return viewHolder;
+        return new NumbersViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull NumbersViewHolder holder, int position) {
-        holder.bind(position);
+        holder.bind(mNumArray[position]);
     }
 
     @Override
     public int getItemCount() {
-        return mNumberOfItems;
+        return mNumArray.length;
     }
 
-    static class NumbersViewHolder extends RecyclerView.ViewHolder{
-
+    static class NumbersViewHolder extends RecyclerView.ViewHolder {
         TextView mListItemNumbersView;
-        TextView mViewHolderIndex;
 
-        public NumbersViewHolder(View itemView){
+        public NumbersViewHolder(View itemView) {
             super(itemView);
-            mListItemNumbersView=itemView.findViewById(R.id.main_RecyclerElement);
-
-            mViewHolderIndex=itemView.findViewById(R.id.main_RecyclerElementHolder);
+            mListItemNumbersView = itemView.findViewById(R.id.numberTextView);
         }
-        public void bind(int listIndex){
+
+        public void bind(int listIndex) {
             mListItemNumbersView.setText(String.valueOf(listIndex));
         }
-
     }
 }
