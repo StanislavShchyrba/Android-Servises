@@ -1,11 +1,13 @@
-package com.example.test.sorters;
+package com.example.usage.sorters;
 
 import androidx.annotation.NonNull;
+
+import com.example.usage.SortingMethod;
 
 public class SorterFactory {
 
     @NonNull
-    public static Sorter create(@NonNull Sorter.SortingMethod method) {
+    public static Sorter create(@NonNull SortingMethod method) {
         switch (method) {
             default:
             case BUBBLESORT:
