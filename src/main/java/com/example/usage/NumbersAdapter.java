@@ -1,25 +1,26 @@
-package com.example.test;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+package com.example.usage;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
 public class NumbersAdapter extends RecyclerView.Adapter<NumbersAdapter.NumbersViewHolder> {
     private int[] mNumArray;
 
-    public NumbersAdapter(int numArray) {
-        mNumArray = new int[numArray];
+    public NumbersAdapter() {
+        mNumArray = new int[0];
     }
 
-    public void setDataSet(int[] array) {
+    public void setDataSet(@NonNull int[] array) {
         mNumArray = array;
         notifyDataSetChanged();
     }
 
+    @NonNull
     public int[] getDataSet() {
         return mNumArray;
     }
@@ -51,8 +52,8 @@ public class NumbersAdapter extends RecyclerView.Adapter<NumbersAdapter.NumbersV
             mListItemNumbersView = itemView.findViewById(R.id.numberTextView);
         }
 
-        public void bind(int listIndex) {
-            mListItemNumbersView.setText(String.valueOf(listIndex));
+        public void bind(int model) {
+            mListItemNumbersView.setText(String.valueOf(model));
         }
     }
 }
