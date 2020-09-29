@@ -1,11 +1,10 @@
-package com.example.usage.sorters;
+package com.example.sorters;
 
 import androidx.annotation.NonNull;
 
-import com.example.usage.SortingMethod;
+import com.example.sortingapp.SortingMethod;
 
 public class SorterFactory {
-
     @NonNull
     public static Sorter create(@NonNull SortingMethod method) {
         switch (method) {

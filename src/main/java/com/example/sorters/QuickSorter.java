@@ -1,4 +1,4 @@
-package com.example.usage.sorters;
+package com.example.sorters;
 
 import androidx.annotation.NonNull;
 

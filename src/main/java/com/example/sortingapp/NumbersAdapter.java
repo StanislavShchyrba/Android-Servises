@@ -1,4 +1,4 @@
-package com.example.usage;
+package com.example.sortingapp;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class NumbersAdapter extends RecyclerView.Adapter<NumbersAdapter.NumbersViewHolder> {
+    @NonNull
     private int[] mNumArray;
 
     public NumbersAdapter() {

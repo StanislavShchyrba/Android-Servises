@@ -1,8 +1,6 @@
-package com.example.usage;
+package com.example.sortingapp;
 
 import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -18,28 +16,28 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.sortmanager.SortServiceManager;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
-
     private static final int NUMBER_OF_ELEMENTS = 100;
 
-    private Button mGenerateButton, mSortButton;
-
-    private Spinner mSpinner;
+    private Button mGenerateButton = null, mSortButton = null;
 
     private RecyclerView mNumberList = null;
     private NumbersAdapter mNumbersAdapter = null;
 
     private SortingMethod mSortingMethod = SortingMethod.BUBBLESORT;//as Default
-    private ISortService miSortService;
+    private SortServiceManager mSortManager = new SortServiceManager();
 
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            miSortService = ISortService.Stub.asInterface(iBinder);
+            mSortManager.serviceConnected(iBinder);
+            //miSortService = ISortService.Stub.asInterface(iBinder);
             Toast toast = Toast.makeText(getApplicationContext(),
                     "Service connected", Toast.LENGTH_SHORT);
             toast.show();
@@ -47,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-            miSortService = null;
+            mSortManager = null;
         }
     };
 
@@ -55,20 +53,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        SortServiceManager sortServiceManager = new SortServiceManager();
 
-        //Service creation and binding
-        Intent intent = new Intent(this, SortService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        try {
+            sortServiceManager.bind(this, mConnection);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         initButtons();
         initRecyclerView();
         initSpinner();
     }
 
-
     @Override
     public void onClick(View view) {
-
         if (view == mGenerateButton) {
             onGenerateButtonClicked();
 
@@ -88,7 +87,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void onSortButtonClicked() {
-
         if (mNumbersAdapter == null || mNumberList == null) {
             Toast toast = Toast.makeText(getApplicationContext(),
                     "No numbers to sort, press generate firstly", Toast.LENGTH_SHORT);
@@ -104,26 +102,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         try {
-            mNumbersAdapter.setDataSet(miSortService.sort(mNumbersAdapter.getDataSet(), mSortingMethod));
+            mNumbersAdapter.setDataSet(mSortManager.sort(mNumbersAdapter.getDataSet(), mSortingMethod));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
     }
 
     private void onGenerateButtonClicked() {
-
         mNumbersAdapter = new NumbersAdapter();
         mNumberList.setAdapter(mNumbersAdapter);
 
         try {
-            mNumbersAdapter.setDataSet(miSortService.generate(NUMBER_OF_ELEMENTS));
+            mNumbersAdapter.setDataSet(mSortManager.generate(NUMBER_OF_ELEMENTS));
         } catch (RemoteException e) {
             e.printStackTrace();
         }
     }
 
     private void initButtons() {
-
         mGenerateButton = (Button) findViewById(R.id.main_GenerateButton);
         mSortButton = (Button) findViewById(R.id.main_SortButton);
 
@@ -132,7 +128,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initRecyclerView() {
-
         mNumberList = findViewById(R.id.main_RecyclerView);
         mNumberList.setHasFixedSize(true);
         LinearLayoutManager NumberListManager = new LinearLayoutManager(this);
@@ -140,7 +135,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initSpinner() {
-        mSpinner = findViewById(R.id.main_Spinner);
+        Spinner mSpinner = findViewById(R.id.main_Spinner);
 
         List<String> captionList = new ArrayList<>();
         for (SortingMethod sort : SortingMethod.values()) {
