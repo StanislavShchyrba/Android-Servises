@@ -14,44 +14,45 @@ import com.example.sortingapp.SortingMethod;
 import java.util.concurrent.CountDownLatch;
 
 public class SortServiceManager {
+    private static final long AWAIT_TIMEOUT_MILLS = 1000;
+
     private CountDownLatch mLatch = new CountDownLatch(1);
-    private boolean IsServiceConnected = false;
-    private ISortService miSortService = null;
+    private ISortService mSortService = null;
 
-    public boolean bind(final Context context, final ServiceConnection Connection) throws InterruptedException {
+    private Executor mCallbackExecutor = Executors.newSingleThreadExecutor();
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                bindInNewThread(mLatch, context, Connection);
-            }
-        }).start();
+    private ServiceConnection mConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            SortServiceManager.this.onServiceConnected(iBinder);
+        }
 
-        mLatch.await();
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+        }
+    };
 
-        return IsServiceConnected;
+    public boolean bind(final Context context) {
+        Intent intent = new Intent(context, SortService.class);
+        context.bindService(intent, Context.BIND_AUTO_CREATE, mCallbackExecutor, mConnection);
+
+        // todo fix this:
+        mLatch.await(AWAIT_TIMEOUT);
+
+        return mSortService != null;
     }
 
-    public void serviceConnected(@NonNull IBinder iBinder) {
-        miSortService = ISortService.Stub.asInterface(iBinder);
+    public void onServiceConnected(@NonNull IBinder iBinder) {
+        mSortService = ISortService.Stub.asInterface(iBinder);
+        mLatch.countDown();
     }
 
     @NonNull
     public int[] generate(int count) throws RemoteException {
-        return miSortService.generate(count);
+        return mSortService.generate(count);
     }
 
     public int[] sort(int[] arr, @NonNull SortingMethod method) throws RemoteException {
-        return miSortService.sort(arr, method);
-    }
-
-    private void bindInNewThread(CountDownLatch latch, Context context, ServiceConnection Connection) {
-
-        Intent intent = new Intent(context, SortService.class);
-        context.bindService(intent, Connection, Context.BIND_AUTO_CREATE);
-
-        mLatch.countDown();
-
-        IsServiceConnected = true;
+        return mSortService.sort(arr, method);
     }
 }

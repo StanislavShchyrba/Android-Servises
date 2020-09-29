@@ -4,4 +4,6 @@
     <string name="bubble_sort">Bubble Sort</string>
     <string name="quicksort">Quicksort</string>
     <string name="counting_sort">Counting Sort</string>
+
+    <string name="press_generate_first">"No numbers to sort, press generate firstly"</string>
 </resources>

@@ -22,31 +22,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
-
     private static final int NUMBER_OF_ELEMENTS = 100;
 
-    private Button mGenerateButton = null, mSortButton = null;
+    private Button mGenerateButton, mSortButton;
 
-    private RecyclerView mNumberList = null;
-    private NumbersAdapter mNumbersAdapter = null;
+    private RecyclerView mNumberListRecycleView;
+    private NumbersAdapter mNumbersAdapter;
 
-    private SortingMethod mSortingMethod = SortingMethod.BUBBLESORT;//as Default
+    private SortingMethod mSortingMethod = SortingMethod.BUBBLESORT; // as Default
     private SortServiceManager mSortManager = new SortServiceManager();
-
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            mSortManager.serviceConnected(iBinder);
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "Service connected", Toast.LENGTH_SHORT);
-            toast.show();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mSortManager = null;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +38,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
         SortServiceManager sortServiceManager = new SortServiceManager();
 
-        try {
-            sortServiceManager.bind(this, mConnection);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // todo: move out into separate thread
+        boolean isStartedSuccesfully = sortServiceManager.bind(this, mConnection);
+
+        // todo:
+        Toast.create() // show toast with isStartedSuccesfully
+
         initButtons();
         initRecyclerView();
         initSpinner();
@@ -85,36 +70,46 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void onSortButtonClicked() {
-        if (mNumbersAdapter == null || mNumberList == null) {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No numbers to sort, press generate firstly", Toast.LENGTH_SHORT);
-            toast.show();
+        if (mNumbersAdapter == null || mNumbersAdapter.getDataSet().length == 0) {
+            Toast.makeText(getApplicationContext(),
+                    R.string.press_generate_first, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (mNumbersAdapter.getDataSet().length == 0) {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No numbers to sort, press generate firstly", Toast.LENGTH_SHORT);
-            toast.show();
-            return;
-        }
+        int[] sortedNumbersArray = null;
 
         try {
-            mNumbersAdapter.setDataSet(mSortManager.sort(mNumbersAdapter.getDataSet(), mSortingMethod));
+            sortedNumbersArray = mSortManager.sort(mNumbersAdapter.getDataSet(), mSortingMethod)
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+
+        if (sortedNumbersArray == null) {
+            // something bad has happened(
+            // todo: show toast
+            return;
+        }
+
+        mNumbersAdapter.setDataSet(sortedNumbersArray);
     }
 
     private void onGenerateButtonClicked() {
-        mNumbersAdapter = new NumbersAdapter();
-        mNumberList.setAdapter(mNumbersAdapter);
+        int[] numbersArray = null;
 
         try {
-            mNumbersAdapter.setDataSet(mSortManager.generate(NUMBER_OF_ELEMENTS));
+            numbersArray = mSortManager.generate(NUMBER_OF_ELEMENTS);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+
+        if (numbersArray == null) {
+            // show error toast
+            return;
+        }
+
+        mNumbersAdapter = new NumbersAdapter();
+        mNumbersAdapter.setDataSet(numbersArray);
+        mNumberListRecycleView.setAdapter(mNumbersAdapter);
     }
 
     private void initButtons() {
@@ -126,10 +121,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initRecyclerView() {
-        mNumberList = findViewById(R.id.main_RecyclerView);
-        mNumberList.setHasFixedSize(true);
+        mNumberListRecycleView = findViewById(R.id.main_RecyclerView);
+        mNumberListRecycleView.setHasFixedSize(true);
         LinearLayoutManager NumberListManager = new LinearLayoutManager(this);
-        mNumberList.setLayoutManager(NumberListManager);
+        mNumberListRecycleView.setLayoutManager(NumberListManager);
     }
 
     private void initSpinner() {
