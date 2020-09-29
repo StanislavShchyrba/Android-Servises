@@ -21,8 +21,8 @@ import com.example.sortmanager.SortServiceManager;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+
     private static final int NUMBER_OF_ELEMENTS = 100;
 
     private Button mGenerateButton = null, mSortButton = null;
@@ -37,7 +37,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
             mSortManager.serviceConnected(iBinder);
-            //miSortService = ISortService.Stub.asInterface(iBinder);
             Toast toast = Toast.makeText(getApplicationContext(),
                     "Service connected", Toast.LENGTH_SHORT);
             toast.show();
@@ -60,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
         initButtons();
         initRecyclerView();
         initSpinner();
@@ -83,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-        // do nothing
+
     }
 
     private void onSortButtonClicked() {

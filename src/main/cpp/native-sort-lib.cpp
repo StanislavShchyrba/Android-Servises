@@ -35,6 +35,7 @@ namespace jni_layer_sorter {
 
     extern "C"
     JNIEXPORT jintArray JNICALL
+
     Java_com_example_sorters_BubbleSorter_bubbleSort(JNIEnv *env, jobject thiz,
                                                                 jintArray array) {
         jint *arr = env->GetIntArrayElements(array, 0);

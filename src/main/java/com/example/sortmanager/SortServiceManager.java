@@ -7,22 +7,16 @@ import android.os.IBinder;
 import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.example.sortingapp.ISortService;
 import com.example.sortingapp.SortingMethod;
 
 import java.util.concurrent.CountDownLatch;
 
-public class SortServiceManager implements Runnable {
+public class SortServiceManager {
     private CountDownLatch mLatch = new CountDownLatch(1);
     private boolean IsServiceConnected = false;
     private ISortService miSortService = null;
-
-    @Override
-    public void run() {
-
-    }
 
     public boolean bind(final Context context, final ServiceConnection Connection) throws InterruptedException {
 
@@ -38,7 +32,7 @@ public class SortServiceManager implements Runnable {
         return IsServiceConnected;
     }
 
-    public void serviceConnected(@Nullable IBinder iBinder) {
+    public void serviceConnected(@NonNull IBinder iBinder) {
         miSortService = ISortService.Stub.asInterface(iBinder);
     }
 
