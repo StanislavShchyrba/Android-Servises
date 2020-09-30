@@ -6,4 +6,6 @@
     <string name="counting_sort">Counting Sort</string>
 
     <string name="press_generate_first">"No numbers to sort, press generate firstly"</string>
+    <string name="service_binded">"Service connected"</string>
+    <string name="something_went_wrong">"Error: no numbers to show"</string>
 </resources>

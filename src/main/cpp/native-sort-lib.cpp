@@ -10,9 +10,9 @@
 
 #define TAG "Native code log"
 
-using namespace native_layer_sorter;
+using namespace native_sorter;
 
-namespace jni_layer_sorter {
+namespace jni_sorter {
 
     extern "C"
     JNIEXPORT jintArray JNICALL

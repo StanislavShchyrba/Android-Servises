@@ -1,7 +1,7 @@
 #include <cstring>
 #include "countingsort.h"
 
-namespace native_layer_sorter {
+namespace native_sorter {
     void countingSort(int arr[], int size) {
         int output[size];
 

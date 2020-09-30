@@ -1,9 +1,8 @@
 package com.example.sortingapp;
 
-import android.content.ComponentName;
-import android.content.ServiceConnection;
+
+import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,6 +11,7 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,17 +32,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SortingMethod mSortingMethod = SortingMethod.BUBBLESORT; // as Default
     private SortServiceManager mSortManager = new SortServiceManager();
 
+    boolean isStartedSuccesfully = false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SortServiceManager sortServiceManager = new SortServiceManager();
 
-        // todo: move out into separate thread
-        boolean isStartedSuccesfully = sortServiceManager.bind(this, mConnection);
+        new Thread(() -> {
+            isStartedSuccesfully = mSortManager.bind(MainActivity.this);
+        }).start();
 
-        // todo:
-        Toast.create() // show toast with isStartedSuccesfully
+        Toast.makeText(getApplicationContext(),
+                R.string.service_binded, Toast.LENGTH_SHORT).show();
 
         initButtons();
         initRecyclerView();
@@ -78,15 +81,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         int[] sortedNumbersArray = null;
 
-        try {
-            sortedNumbersArray = mSortManager.sort(mNumbersAdapter.getDataSet(), mSortingMethod)
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
+        sortedNumbersArray = mSortManager.sort(mNumbersAdapter.getDataSet(), mSortingMethod);
 
         if (sortedNumbersArray == null) {
-            // something bad has happened(
-            // todo: show toast
+            Toast.makeText(getApplicationContext(),
+                    R.string.something_went_wrong, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -103,7 +102,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         if (numbersArray == null) {
-            // show error toast
+            Toast.makeText(getApplicationContext(),
+                    R.string.something_went_wrong, Toast.LENGTH_SHORT).show();
             return;
         }
 

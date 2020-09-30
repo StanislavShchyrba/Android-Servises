@@ -1,17 +1,24 @@
 package com.example.sortmanager;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.example.sortingapp.ISortService;
 import com.example.sortingapp.SortingMethod;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 
 public class SortServiceManager {
     private static final long AWAIT_TIMEOUT_MILLS = 1000;
@@ -36,9 +43,11 @@ public class SortServiceManager {
         Intent intent = new Intent(context, SortService.class);
         context.bindService(intent, Context.BIND_AUTO_CREATE, mCallbackExecutor, mConnection);
 
-        // todo fix this:
-        mLatch.await(AWAIT_TIMEOUT);
-
+        try {
+            mLatch.await(AWAIT_TIMEOUT_MILLS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ex) {
+            ex.printStackTrace();
+        }
         return mSortService != null;
     }
 
@@ -52,7 +61,12 @@ public class SortServiceManager {
         return mSortService.generate(count);
     }
 
-    public int[] sort(int[] arr, @NonNull SortingMethod method) throws RemoteException {
-        return mSortService.sort(arr, method);
+    public int[] sort(int[] arr, @NonNull SortingMethod method) {
+        try {
+            return mSortService.sort(arr, method);
+        } catch (RemoteException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 }

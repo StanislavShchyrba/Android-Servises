@@ -1,7 +1,7 @@
 #include <algorithm>
 #include "quicksort.h"
 
-namespace native_layer_sorter {
+namespace native_sorter {
     void quickSort(int arr[], int low, int high) {
         if (low < high) {
             int pi = partition(arr, low, high);

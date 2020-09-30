@@ -1,7 +1,7 @@
 #include <algorithm>
 #include"bubblesort.h"
 
-namespace native_layer_sorter {
+namespace native_sorter {
     void bubbleSort(int arr[], int size) {
         int i, j;
         for (i = 0; i < size - 1; i++) {
