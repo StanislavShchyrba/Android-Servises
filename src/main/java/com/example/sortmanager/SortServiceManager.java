@@ -24,7 +24,7 @@ public class SortServiceManager {
     private static final long AWAIT_TIMEOUT_MILLS = 1000;
 
     private CountDownLatch mLatch = new CountDownLatch(1);
-    private ISortService mSortService = null;
+    private volatile ISortService mSortService = null;
 
     private Executor mCallbackExecutor = Executors.newSingleThreadExecutor();
 

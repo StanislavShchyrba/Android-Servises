@@ -3,7 +3,7 @@
 #include <cstring>
 #include <android/log.h>
 
-#include "generate.h"
+#include "num_generator.h"
 #include "bubblesort.h"
 #include "countingsort.h"
 #include "quicksort.h"

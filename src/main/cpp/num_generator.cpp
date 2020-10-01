@@ -1,6 +1,6 @@
 #include <cstdlib>
 
-#include "generate.h"
+#include "num_generator.h"
 
 namespace native_sorter {
     void generate(int arr[], int size) {

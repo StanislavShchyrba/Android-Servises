@@ -1,8 +1,8 @@
 package com.example.sortingapp;
 
 
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.view.View;
 import android.widget.AdapterView;
@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +19,7 @@ import com.example.sortmanager.SortServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
     private static final int NUMBER_OF_ELEMENTS = 100;
@@ -32,8 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SortingMethod mSortingMethod = SortingMethod.BUBBLESORT; // as Default
     private SortServiceManager mSortManager = new SortServiceManager();
 
-    boolean isStartedSuccesfully = false;
-
+    private volatile boolean isServiceBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,11 +40,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         new Thread(() -> {
-            isStartedSuccesfully = mSortManager.bind(MainActivity.this);
+            isServiceBound = mSortManager.bind(MainActivity.this);
         }).start();
-
-        Toast.makeText(getApplicationContext(),
-                R.string.service_binded, Toast.LENGTH_SHORT).show();
 
         initButtons();
         initRecyclerView();
@@ -73,19 +69,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void onSortButtonClicked() {
+        if (!isServiceBound) {
+            Toast.makeText(getApplicationContext(),
+                    R.string.service_isnt_bound, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (mNumbersAdapter == null || mNumbersAdapter.getDataSet().length == 0) {
             Toast.makeText(getApplicationContext(),
                     R.string.press_generate_first, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        int[] sortedNumbersArray = null;
-
-        sortedNumbersArray = mSortManager.sort(mNumbersAdapter.getDataSet(), mSortingMethod);
+        int[] sortedNumbersArray = mSortManager.sort(mNumbersAdapter.getDataSet(), mSortingMethod);
 
         if (sortedNumbersArray == null) {
             Toast.makeText(getApplicationContext(),
-                    R.string.something_went_wrong, Toast.LENGTH_SHORT).show();
+                    R.string.no_numbers_to_show, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -95,6 +95,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void onGenerateButtonClicked() {
         int[] numbersArray = null;
 
+        if (!isServiceBound) {
+            Toast.makeText(getApplicationContext(),
+                    R.string.service_isnt_bound, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         try {
             numbersArray = mSortManager.generate(NUMBER_OF_ELEMENTS);
         } catch (RemoteException e) {
@@ -103,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (numbersArray == null) {
             Toast.makeText(getApplicationContext(),
-                    R.string.something_went_wrong, Toast.LENGTH_SHORT).show();
+                    R.string.no_numbers_to_show, Toast.LENGTH_SHORT).show();
             return;
         }
 

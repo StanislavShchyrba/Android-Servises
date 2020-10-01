@@ -4,7 +4,7 @@ add_library(
         native-sort-lib
         SHARED
         native-sort-lib.cpp
-        generate.cpp
+        num_generator.cpp
         bubblesort.cpp
         quicksort.cpp
         countingsort.cpp)
