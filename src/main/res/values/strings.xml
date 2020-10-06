@@ -4,4 +4,8 @@
     <string name="bubble_sort">Bubble Sort</string>
     <string name="quicksort">Quicksort</string>
     <string name="counting_sort">Counting Sort</string>
+
+    <string name="press_generate_first">"No numbers to sort, press generate firstly"</string>
+    <string name="no_numbers_to_show">"Error: no numbers to show"</string>
+    <string name="service_isnt_bound">"Error: service is not bound"</string>
 </resources>

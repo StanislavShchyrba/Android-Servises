@@ -1,11 +1,8 @@
-package com.example.usage;
+package com.example.sortingapp;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
+
 import android.os.Bundle;
-import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.view.View;
 import android.widget.AdapterView;
@@ -18,57 +15,41 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.sortmanager.SortServiceManager;
+
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
-
     private static final int NUMBER_OF_ELEMENTS = 100;
 
     private Button mGenerateButton, mSortButton;
 
-    private Spinner mSpinner;
+    private RecyclerView mNumberListRecycleView;
+    private NumbersAdapter mNumbersAdapter;
 
-    private RecyclerView mNumberList = null;
-    private NumbersAdapter mNumbersAdapter = null;
+    private SortingMethod mSortingMethod = SortingMethod.BUBBLESORT; // as Default
+    private SortServiceManager mSortManager = new SortServiceManager();
 
-    private SortingMethod mSortingMethod = SortingMethod.BUBBLESORT;//as Default
-    private ISortService miSortService;
-
-    private ServiceConnection mConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-            miSortService = ISortService.Stub.asInterface(iBinder);
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "Service connected", Toast.LENGTH_SHORT);
-            toast.show();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            miSortService = null;
-        }
-    };
+    private volatile boolean isServiceBound = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Service creation and binding
-        Intent intent = new Intent(this, SortService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        new Thread(() -> {
+            isServiceBound = mSortManager.bind(MainActivity.this);
+        }).start();
 
         initButtons();
         initRecyclerView();
         initSpinner();
     }
 
-
     @Override
     public void onClick(View view) {
-
         if (view == mGenerateButton) {
             onGenerateButtonClicked();
 
@@ -84,46 +65,60 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-        // do nothing
+
     }
 
     private void onSortButtonClicked() {
-
-        if (mNumbersAdapter == null || mNumberList == null) {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No numbers to sort, press generate firstly", Toast.LENGTH_SHORT);
-            toast.show();
+        if (!isServiceBound) {
+            Toast.makeText(getApplicationContext(),
+                    R.string.service_isnt_bound, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        if (mNumbersAdapter.getDataSet().length == 0) {
-            Toast toast = Toast.makeText(getApplicationContext(),
-                    "No numbers to sort, press generate firstly", Toast.LENGTH_SHORT);
-            toast.show();
+        if (mNumbersAdapter == null || mNumbersAdapter.getDataSet().length == 0) {
+            Toast.makeText(getApplicationContext(),
+                    R.string.press_generate_first, Toast.LENGTH_SHORT).show();
             return;
         }
 
-        try {
-            mNumbersAdapter.setDataSet(miSortService.sort(mNumbersAdapter.getDataSet(), mSortingMethod));
-        } catch (RemoteException e) {
-            e.printStackTrace();
+        int[] sortedNumbersArray = mSortManager.sort(mNumbersAdapter.getDataSet(), mSortingMethod);
+
+        if (sortedNumbersArray == null) {
+            Toast.makeText(getApplicationContext(),
+                    R.string.no_numbers_to_show, Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        mNumbersAdapter.setDataSet(sortedNumbersArray);
     }
 
     private void onGenerateButtonClicked() {
+        int[] numbersArray = null;
 
-        mNumbersAdapter = new NumbersAdapter();
-        mNumberList.setAdapter(mNumbersAdapter);
+        if (!isServiceBound) {
+            Toast.makeText(getApplicationContext(),
+                    R.string.service_isnt_bound, Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         try {
-            mNumbersAdapter.setDataSet(miSortService.generate(NUMBER_OF_ELEMENTS));
+            numbersArray = mSortManager.generate(NUMBER_OF_ELEMENTS);
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+
+        if (numbersArray == null) {
+            Toast.makeText(getApplicationContext(),
+                    R.string.no_numbers_to_show, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        mNumbersAdapter = new NumbersAdapter();
+        mNumbersAdapter.setDataSet(numbersArray);
+        mNumberListRecycleView.setAdapter(mNumbersAdapter);
     }
 
     private void initButtons() {
-
         mGenerateButton = (Button) findViewById(R.id.main_GenerateButton);
         mSortButton = (Button) findViewById(R.id.main_SortButton);
 
@@ -132,15 +127,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void initRecyclerView() {
-
-        mNumberList = findViewById(R.id.main_RecyclerView);
-        mNumberList.setHasFixedSize(true);
+        mNumberListRecycleView = findViewById(R.id.main_RecyclerView);
+        mNumberListRecycleView.setHasFixedSize(true);
         LinearLayoutManager NumberListManager = new LinearLayoutManager(this);
-        mNumberList.setLayoutManager(NumberListManager);
+        mNumberListRecycleView.setLayoutManager(NumberListManager);
     }
 
     private void initSpinner() {
-        mSpinner = findViewById(R.id.main_Spinner);
+        Spinner mSpinner = findViewById(R.id.main_Spinner);
 
         List<String> captionList = new ArrayList<>();
         for (SortingMethod sort : SortingMethod.values()) {

@@ -1,4 +1,4 @@
-package com.example.usage;
+package com.example.sortingapp;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -25,12 +25,7 @@ public enum SortingMethod implements Parcelable {
         }
     };
 
-    SortingMethod() {
-
-    }
-
     public int getCaptionStringId() {
-
         throw new AssertionError("getCaptionStringId() should be overridden!");
     }
 
@@ -45,7 +40,6 @@ public enum SortingMethod implements Parcelable {
     }
 
     public static final Creator<SortingMethod> CREATOR = new Parcelable.Creator<SortingMethod>() {
-
         @NonNull
         @Override
         public SortingMethod createFromParcel(Parcel source) {
@@ -60,4 +54,4 @@ public enum SortingMethod implements Parcelable {
             return new SortingMethod[size];
         }
     };
-};
+}

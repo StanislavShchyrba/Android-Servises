@@ -1,9 +1,8 @@
-package com.example.usage.sorters;
+package com.example.sorters;
 
 import androidx.annotation.NonNull;
 
 public class BubbleSorter implements Sorter {
-
     @NonNull
     @Override
     public int[] sort(@NonNull int[] array) {
