@@ -2,7 +2,6 @@ package com.example.sortingapp;
 
 
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.view.View;
 import android.widget.AdapterView;
@@ -19,7 +18,6 @@ import com.example.sortmanager.SortServiceManager;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
     private static final int NUMBER_OF_ELEMENTS = 100;
@@ -41,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         new Thread(() -> {
             isServiceBound = mSortManager.bind(MainActivity.this);
+
         }).start();
 
         initButtons();
