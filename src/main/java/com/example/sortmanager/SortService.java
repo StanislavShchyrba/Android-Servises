@@ -43,4 +43,5 @@ public class SortService extends Service {
 
     @NonNull
     private native int[] nativeGenerate(int count);
+
 }

@@ -4,12 +4,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.example.sortingapp.ISortService;
 import com.example.sortingapp.SortingMethod;
@@ -24,7 +22,7 @@ public class SortServiceManager {
     private static final long AWAIT_TIMEOUT_MILLS = 1000;
 
     private CountDownLatch mLatch = new CountDownLatch(1);
-    private volatile ISortService mSortService = null;
+    private volatile ISortService mSortService;
 
     private Executor mCallbackExecutor = Executors.newSingleThreadExecutor();
 
@@ -38,6 +36,10 @@ public class SortServiceManager {
         public void onServiceDisconnected(ComponentName componentName) {
         }
     };
+
+    public SortServiceManager(Context context) { //JNI simplification
+        bind(context);
+    }
 
     public boolean bind(final Context context) {
         Intent intent = new Intent(context, SortService.class);

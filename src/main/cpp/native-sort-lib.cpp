@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <android/log.h>
+#include <chrono> //"Test" button
 
 #include "num_generator.h"
 #include "bubblesort.h"
@@ -37,7 +38,7 @@ namespace jni_sorter {
     JNIEXPORT jintArray JNICALL
 
     Java_com_example_sorters_BubbleSorter_bubbleSort(JNIEnv *env, jobject thiz,
-                                                                jintArray array) {
+                                                     jintArray array) {
         jint *arr = env->GetIntArrayElements(array, 0);
         int len = env->GetArrayLength(array);
 
@@ -51,7 +52,7 @@ namespace jni_sorter {
     extern "C"
     JNIEXPORT jintArray JNICALL
     Java_com_example_sorters_QuickSorter_quickSort(JNIEnv *env, jobject thiz,
-                                                              jintArray array) {
+                                                   jintArray array) {
         jint *arr = env->GetIntArrayElements(array, 0);
         int len = env->GetArrayLength(array);
 
@@ -65,7 +66,7 @@ namespace jni_sorter {
     extern "C"
     JNIEXPORT jintArray JNICALL
     Java_com_example_sorters_CountingSorter_countingSort(JNIEnv *env, jobject thiz,
-                                                                    jintArray array) {
+                                                         jintArray array) {
         jint *arr = env->GetIntArrayElements(array, 0);
         int len = env->GetArrayLength(array);
 
@@ -74,6 +75,38 @@ namespace jni_sorter {
         env->ReleaseIntArrayElements(array, arr, JNI_COMMIT);
 
         return array;
+    }
+
+    extern "C"
+    JNIEXPORT jintArray JNICALL
+    Java_com_example_testsortservice_TestSortService_nativeTest(JNIEnv *env, jobject thiz,
+                                                                jint testArraySize) {
+        jclass cls = env->GetObjectClass(thiz);
+        jmethodID methodId = env->GetMethodID(cls, "createSortServiceManager",
+                                              "()Lcom/example/sortmanager/SortServiceManager;");
+        jobject sortServiceManager = env->CallObjectMethod(thiz, methodId);
+
+        jmethodID generateMethodId = env->GetMethodID(env->GetObjectClass(sortServiceManager),
+                                                      "generate", "(I)[I");// get generate method id
+        auto array = reinterpret_cast<jintArray >(env->CallObjectMethod(sortServiceManager,
+                                                                        generateMethodId,
+                                                                        testArraySize)); // execute generate() method
+
+        jmethodID bubbleSortId = env->GetMethodID(env->GetObjectClass(sortServiceManager), "sort",
+                                                  "([ILcom/example/sortingapp/SortingMethod;)[I");
+        auto bubbleArray = reinterpret_cast<jintArray>(env->CallObjectMethod(sortServiceManager,
+                                                                             bubbleSortId, array));
+
+        jmethodID countSortId = env->GetMethodID(env->GetObjectClass(sortServiceManager), "sort",
+                                                 "([ILcom/example/sortingapp/SortingMethod;)[I");
+        auto countArray = reinterpret_cast<jintArray>(env->CallObjectMethod(sortServiceManager,
+                                                                            countSortId, array));
+
+        jmethodID quickSortId = env->GetMethodID(env->GetObjectClass(sortServiceManager), "sort",
+                                                 "([ILcom/example/sortingapp/SortingMethod;)[I");
+        auto quickArray = reinterpret_cast<jintArray>(env->CallObjectMethod(sortServiceManager,
+                                                                            quickSortId, array));
+
     }
 }
 
